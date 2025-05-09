@@ -1,10 +1,8 @@
 const { src, dest, parallel, series, watch } = require('gulp');
 const glob = require('glob');
-const sass = require('gulp-sass')(require('node-sass'));
-const autoprefixer = require('gulp-autoprefixer');
+const sass = require('gulp-sass')(require('sass'));
 const uglify = require('gulp-uglify');
 const concat = require('gulp-concat');
-const open = require('gulp-open');
 const saveLicense = require('uglify-save-license');
 const babel = require('gulp-babel');
 const through = require('through2');
@@ -46,9 +44,8 @@ const compileScss = () => {
   return src(['./src/scss/*.scss'])
     .pipe(sass({
       'includePaths': ['node_modules'],
-      'outputStyle': argv.dev ? 'development' : 'compressed'
+      'style': argv.dev ? 'expanded' : 'compressed'
     }).on('error', sass.logError))
-    .pipe(autoprefixer())
     .pipe(dest('./dist/'));
 };
 
@@ -56,14 +53,14 @@ const compileDemoScss = () => {
   return src(['./docs/demo.scss'])
     .pipe(sass({
       'includePaths': ['node_modules'],
-      'outputStyle': argv.dev ? 'development' : 'compressed'
+      'style': argv.dev ? 'expanded' : 'compressed'
     }).on('error', sass.logError))
-    .pipe(autoprefixer())
     .pipe(dest('./docs/'));
 };
 
-const runDemo = () => {
-  return src('./docs/index.html').pipe(open());
+const runDemo = async () => {
+  const open = (await import('open')).default;
+  await open('./docs/index.html');
 };
 
 const bumpPackage = () => {
@@ -98,13 +95,9 @@ const bumpHtml = () => {
 const defaultTask = parallel(compileJs, compileScss, compileDemoScss);
 
 const watchFiles = () => {
-  const watch_scss = glob.sync('./src/scss/*.scss');
-  const watch_js = glob.sync('./src/js/*.js');
-  const watch_demo = glob.sync('./docs/demo.scss');
-
-  watch(watch_scss, parallel(compileScss, compileDemoScss));
-  watch(watch_demo, compileDemoScss);
-  watch(watch_js, compileJs);
+  watch('./src/scss/**/*.scss', parallel(compileScss, compileDemoScss));
+  watch('./docs/demo.scss', compileDemoScss);
+  watch('./src/js/**/*.js', compileJs);
 };
 
 module.exports.default = defaultTask;

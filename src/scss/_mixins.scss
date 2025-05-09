@@ -1,3 +1,5 @@
+@use 'sass:math';
+
 $hc-offcanvas-nav-trigger-width:              30px !default;
 $hc-offcanvas-nav-trigger-height:             24px !default;
 $hc-offcanvas-nav-trigger-line-width:         4px !default;
@@ -14,7 +16,9 @@ $hc-offcanvas-nav-trigger-transform-speed:    .2s !default;
   width: $width;
   min-height: $height;
 
-  $line-offset: ($height - $line-width) / 2;
+  $line-height: $line-width;
+  $line-spacing: math.div(($height - $line-width * 3), 2);
+  $line-offset: math.div(($height - $line-width), 2);
 
   span {
     width: $width;

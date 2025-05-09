@@ -1,5 +1,5 @@
-@import './mixins';
+@use './mixins';
 
 .hc-nav-trigger {
-  @include hc-hamburger;
+  @include mixins.hc-hamburger;
 }

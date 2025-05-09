@@ -15,21 +15,21 @@
     "url": "git+https://github.com/somewebmedia/hc-offcanvas-nav.git"
   },
   "devDependencies": {
-    "@babel/cli": "^7.12.8",
-    "@babel/core": "^7.12.9",
-    "@babel/preset-env": "^7.12.7",
+    "@babel/cli": "^7.22.10",
+    "@babel/core": "^7.22.10",
+    "@babel/preset-env": "^7.22.10",
     "gulp": "^4.0.2",
-    "gulp-autoprefixer": "^6.1.0",
     "gulp-babel": "^8.0.0",
     "gulp-bump": "^3.2.0",
     "gulp-concat": "^2.6.1",
-    "gulp-open": "^3.0.1",
-    "gulp-replace": "^1.0.0",
-    "gulp-sass": "^5.0.0",
+    "gulp-replace": "^1.1.4",
+    "gulp-sass": "^6.0.1",
     "gulp-uglify": "^3.0.2",
-    "node-sass": "^6.0.1",
+    "open": "^10.1.2",
+    "sass": "^1.66.1",
+    "through2": "^4.0.2",
     "uglify-save-license": "^0.4.1",
-    "yargs": "^15.4.1"
+    "yargs": "^17.7.2"
   },
   "keywords": [
     "nav",
@@ -42,7 +42,6 @@
     "hamburger-menu",
     "swipe-menu",
     "jquery",
-    "plugin",
-    "jquery-plugin"
+    "plugin"
   ]
 }
