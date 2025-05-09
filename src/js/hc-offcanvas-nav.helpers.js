@@ -4,74 +4,6 @@
   const hcOffcanvasNav = window.hcOffcanvasNav;
   const document = window.document;
 
-  if (typeof Object.assign !== 'function') {
-    Object.defineProperty(Object, 'assign', {
-      value: function assign(target, varArgs) {
-        'use strict';
-        if (target == null) {
-          throw new TypeError('Cannot convert undefined or null to object');
-        }
-
-        var to = Object(target);
-
-        for (var index = 1; index < arguments.length; index++) {
-          var nextSource = arguments[index];
-
-          if (nextSource != null) {
-            for (var nextKey in nextSource) {
-              if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-                to[nextKey] = nextSource[nextKey];
-              }
-            }
-          }
-        }
-        return to;
-      },
-      writable: true,
-      configurable: true
-    });
-  }
-
-  if (!Element.prototype.closest) {
-    Element.prototype.closest = function(s) {
-      let el = this;
-      do {
-        if (Element.prototype.matches.call(el, s)) return el;
-        el = el.parentElement || el.parentNode;
-      } while (el !== null && el.nodeType === 1);
-      return null;
-    };
-  }
-
-  if (!Array.prototype.flat) {
-    Object.defineProperty(Array.prototype, 'flat', {
-      configurable: true,
-      value: function flat() {
-        var depth = isNaN(arguments[0]) ? 1 : Number(arguments[0]);
-
-        return depth ? Array.prototype.reduce.call(this, function (acc, cur) {
-          if (Array.isArray(cur)) {
-            acc.push.apply(acc, flat.call(cur, depth - 1));
-          } else {
-            acc.push(cur);
-          }
-
-          return acc;
-        }, []) : Array.prototype.slice.call(this);
-      },
-      writable: true
-    });
-  }
-
-  if (!Element.prototype.matches) {
-    Element.prototype.matches =
-      Element.prototype.msMatchesSelector ||
-      Element.prototype.matchesSelector ||
-      Element.prototype.mozMatchesSelector ||
-      Element.prototype.oMatchesSelector ||
-      Element.prototype.webkitMatchesSelector;
-  }
-
   let supportsPassive = false;
   try {
     const opts = Object.defineProperty({}, 'passive', {
@@ -92,36 +24,6 @@
   const formatSizeVal = (n) => (n === 'auto') ? '100%' : isNumeric(n) && n !== 0 ? `${n}px` : n;
 
   const toMs = (s) => parseFloat(s) * (/\ds$/.test(s) ? 1000 : 1);
-
-  const stopPropagation = (e) => e.stopPropagation();
-  const preventDefault = (e) => e.preventDefault();
-
-  const preventClick = (cb) => {
-    return (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (typeof cb === 'function') cb();
-    };
-  };
-
-  const browserPrefix = (prop) => {
-    const prefixes = ['Webkit', 'Moz', 'Ms', 'O'];
-    const thisBody = document.body || document.documentElement;
-    const thisStyle = thisBody.style;
-    const Prop = prop.charAt(0).toUpperCase() + prop.slice(1);
-
-    if (typeof thisStyle[prop] !== 'undefined') {
-      return prop;
-    }
-
-    for (let i = 0; i < prefixes.length; i++) {
-      if (typeof thisStyle[prefixes[i] + Prop] !== 'undefined') {
-        return prefixes[i] + Prop;
-      }
-    }
-
-    return false;
-  };
 
   const children = (el, selector) => {
     if (el instanceof Element) {
@@ -449,8 +351,6 @@
   const getAxis = (position) => ['left', 'right'].indexOf(position) !== -1 ? 'x' : 'y';
 
   const setTransform = (() => {
-    const transform = browserPrefix('transform');
-
     return ($el, val, pos) => {
       if (val === false || val === '') {
         $el.style.transform = '';
@@ -495,10 +395,6 @@
     isNumeric,
     formatSizeVal,
     toMs,
-    stopPropagation,
-    preventDefault,
-    preventClick,
-    browserPrefix,
     children,
     wrap,
     data,

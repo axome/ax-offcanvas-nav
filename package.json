@@ -5,11 +5,6 @@
   "homepage": "https://somewebmedia.github.io/hc-offcanvas-nav/",
   "main": "dist/hc-offcanvas-nav.js",
   "sass": "src/scss/hc-offcanvas-nav.scss",
-  "author": {
-    "name": "Some Web Media",
-    "url": "https://github.com/somewebmedia"
-  },
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/somewebmedia/hc-offcanvas-nav.git"

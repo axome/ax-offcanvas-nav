@@ -50,7 +50,6 @@
       width:              280,
       height:             'auto',
       disableAt:          false,
-      pushContent:        null,
       swipeGestures:      true,
       expanded:           false,
       position:           'left', // left, right, top, bottom
@@ -106,7 +105,7 @@
 
       let l = options.length;
       for (let i = 0; i < l; i++) {
-        if (UpdatedSettings.indexOf(options[i]) !== -1) {
+        if (options[i] !== 'pushContent' && UpdatedSettings.indexOf(options[i]) !== -1) {
           hasUpdated = true;
         }
       }
@@ -132,12 +131,11 @@
       const $nav = Helpers.createElement('nav', {id: navUniqId});
       const $nav_container = Helpers.createElement('div', {class: 'nav-container'});
 
-      $nav.addEventListener('click', Helpers.stopPropagation);
+      $nav.addEventListener('click', (e) => e.stopPropagation());
       $nav.appendChild($nav_container);
 
       let $toggle = null;
       let $toggle_open = null;
-      let $push_content = null;
 
       let Model = {};
 
@@ -318,10 +316,6 @@
         _transitionDuration = Helpers.toMs(window.getComputedStyle($nav_container).transitionDuration);
         _transitionFunction = window.getComputedStyle($nav_container).transitionTimingFunction;
 
-        if (Settings.pushContent && $push_content && _transitionProperty) {
-          Styles.add(Helpers.getElementCssTag($push_content), `transition: ${_transitionProperty} ${_transitionDuration}ms ${_transitionFunction}`);
-        }
-
         Styles.insert();
       };
 
@@ -405,9 +399,9 @@
         Styles.insert();
 
         // get page content
-        if (!reinit || (reinit && checkForUpdate('pushContent'))) {
-          $push_content = Settings.pushContent ? Helpers.getElements(Settings.pushContent)[0] : null;
-        }
+        // if (!reinit || (reinit && checkForUpdate('pushContent'))) {
+        //   $push_content = Settings.pushContent ? Helpers.getElements(Settings.pushContent)[0] : null;
+        // }
 
         // remove transition from the nav container so we can update the nav without flickering
         $nav_container.style.transition = 'none';
@@ -567,7 +561,7 @@
           });
           const $content = Helpers.createElement('div', {class: 'nav-content'});
 
-          $wrapper.addEventListener('click', Helpers.stopPropagation);
+          $wrapper.addEventListener('click', (e) => e.stopPropagation());
           $wrapper.appendChild($content);
           $container.appendChild($wrapper);
 
@@ -678,9 +672,10 @@
                 });
               }
 
+              // prevent link click if the item has submenu and it's not disabled
               if ($item_link.getAttribute('href') === '#') {
                 // prevent page jumping
-                $item_link.addEventListener('click', Helpers.preventDefault);
+                $item_link.addEventListener('click', (e) => e.preventDefault());
               }
 
               // close nav on item click
@@ -761,7 +756,7 @@
                     value: uniqid
                   });
 
-                  $checkbox.addEventListener('click', Helpers.stopPropagation);
+                  $checkbox.addEventListener('click', (e) => e.stopPropagation());
                   $checkbox.addEventListener('change', checkboxChange);
                   $item.insertBefore($checkbox, $item.firstChild);
 
@@ -821,7 +816,7 @@
                       tabindex: 0
                     }, Helpers.createElement('span'));
 
-                    $a_next.addEventListener('click', Helpers.preventClick());
+                    $a_next.addEventListener('click', (e) => e.preventDefault());
                     attachToLink($a_next);
 
                     if (Settings.rtl) {
@@ -845,10 +840,14 @@
             if (Settings.insertBack !== false && Settings.levelOpen === 'overlap') {
               const $children_menus = Helpers.children($content, 'ul');
               const backLabel = (Settings.levelTitleAsBack ? (backTitle || Settings.labelBack) : Settings.labelBack) || '';
-              const $back_a = Helpers.createElement('a', {href: '#', class: 'nav-back-button', role: 'menuitem', tabindex: 0}, [
-                backLabel,
-                Helpers.createElement('span')
-              ]);
+              const $back_a = Helpers.createElement('a', {
+                class: 'nav-back',
+                href: '#',
+                role: 'menuitem',
+                tabindex: '0'
+              },
+                (Settings.levelTitleAsBack ? (backTitle === null ? Settings.labelBack : backTitle) : Settings.labelBack)
+              );
 
               if (Settings.insertBack === true || Settings.insertBack === 0) {
                 const $back = Helpers.createElement('div', {class: 'nav-back'}, $back_a);
@@ -862,7 +861,7 @@
               const closeThisLevel = () => closeLevel(level, backIndex);
 
               Helpers.wrap($back_a, Helpers.createElement('div', {class: 'nav-item-wrapper'}));
-              $back_a.addEventListener('click', Helpers.preventClick(closeThisLevel));
+              $back_a.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); closeThisLevel(); });
               $back_a.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.keyCode === 13) {
                   // remember we are accessing via keyboard
@@ -884,7 +883,7 @@
               [Settings.labelClose || '', Helpers.createElement('span')]
             );
 
-            $close_a.addEventListener('click', Helpers.preventClick(closeNav));
+            $close_a.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); closeNav(); });
             $close_a.addEventListener('keydown', (e) => {
               if (e.key === 'Enter' || e.keyCode === 13) {
                 untrapFocus();
@@ -942,26 +941,18 @@
       };
 
       const touchCaptureNav = (transNav, transContent) => {
-        window.addEventListener('touchmove', Helpers.preventDefault, Helpers.supportsPassive); // disable page scroll
+        // disable page scroll
+        window.addEventListener('touchmove', (e) => e.preventDefault(), Helpers.supportsPassive);
         $nav.style.visibility = 'visible';
-        $nav_container.style[Helpers.browserPrefix('transition')] = 'none';
+        $nav_container.style.transition = 'none';
         Helpers.setTransform($nav_container, transNav, Settings.position);
-
-        if ($push_content) {
-          $push_content.style[Helpers.browserPrefix('transition')] = 'none';
-          Helpers.setTransform($push_content, transContent, Settings.position);
-        }
       };
 
       const touchReleaseNav = (action, timeoutVsb = true, transNav = false, transContent = false) => {
-        window.removeEventListener('touchmove', Helpers.preventDefault, Helpers.supportsPassive) // enable page scroll
-        $nav_container.style[Helpers.browserPrefix('transition')] = '';
+        // enable page scroll
+        window.removeEventListener('touchmove', (e) => e.preventDefault(), Helpers.supportsPassive);
+        $nav_container.style.transition = '';
         Helpers.setTransform($nav_container, transNav, Settings.position);
-
-        if ($push_content) {
-          $push_content.style[Helpers.browserPrefix('transition')] = '';
-          Helpers.setTransform($push_content, transContent, Settings.position);
-        }
 
         if (action === 'open') {
           openNav();
@@ -1348,11 +1339,6 @@
           }
         }
 
-        if ($push_content) {
-          const transformVal = Helpers.getAxis(Settings.position) === 'x' ? _containerWidth : _containerHeight;
-          Helpers.setTransform($push_content, transformVal, Settings.position);
-        }
-
         if (_initExpanded) {
           // reset flag
           _initExpanded = false;
@@ -1386,10 +1372,6 @@
         }
 
         _open = false;
-
-        if ($push_content) {
-          Helpers.setTransform($push_content, false);
-        }
 
         $nav.classList.remove(navOpenClass);
         $nav.classList.remove('user-is-tabbing');
@@ -1516,12 +1498,6 @@
           $wrap.addEventListener('click', () => closeLevel(l, i));
           // expand the nav
           Helpers.setTransform($nav_container, l * Settings.levelSpacing, Settings.position);
-
-          // push content
-          if ($push_content) {
-            const transformVal = Helpers.getAxis(Settings.position) === 'x' ? _containerWidth : _containerHeight;
-            Helpers.setTransform($push_content, transformVal + l * Settings.levelSpacing, Settings.position);
-          }
         }
 
         // trigger level open event
@@ -1564,15 +1540,9 @@
         if (transform && Settings.levelOpen === 'overlap') {
           //level closed, remove wrapper click
           $wrap.removeEventListener('click');
-          $wrap.addEventListener('click', Helpers.stopPropagation);
+          $wrap.addEventListener('click', (e) => e.stopPropagation());
           // collapse the nav
           Helpers.setTransform($nav_container, (l - 1) * Settings.levelSpacing, Settings.position);
-
-          // push back content
-          if ($push_content) {
-            const transformVal = Helpers.getAxis(Settings.position) === 'x' ? _containerWidth : _containerHeight;
-            Helpers.setTransform($push_content, transformVal + (l - 1) * Settings.levelSpacing, Settings.position);
-          }
         }
       };
 
